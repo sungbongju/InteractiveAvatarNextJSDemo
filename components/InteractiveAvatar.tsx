@@ -158,7 +158,7 @@ function InteractiveAvatar() {
       console.log("Voice chat started - using OpenAI for responses");
 
       setTimeout(async () => {
-        const greeting = "안녕하세요! 차의과학대학교 경영학전공 AI 상담사 경영이입니다. 전공 선택, 취업, 커리큘럼 등 궁금한 점을 편하게 물어보세요!";
+        const greeting = "안녕하세요! 차의과학대학교 치매 예방 게임 보조 봇 입니다. 게임 중 궁금한 점이 있으면 언제든 말씀해 주세요.";
         await speakWithAvatar(greeting);
         setChatHistory([{ role: "assistant", content: greeting }]);
       }, 1500);
