@@ -158,10 +158,10 @@ function InteractiveAvatar() {
       console.log("Voice chat started - using OpenAI for responses");
 
       setTimeout(async () => {
-        const greeting = "안녕하세요! 차의과학대학교 치매 예방 게임 보조 봇 입니다. 게임 중 궁금한 점이 있으면 언제든 말씀해 주세요.";
+        const greeting = "안녕하세요? 저는 치매 예방 게임 도우미입니다. 도움이 필요하시다면 언제든지 말씀해주세요.";
         await speakWithAvatar(greeting);
         setChatHistory([{ role: "assistant", content: greeting }]);
-      }, 1500);
+      }, 1000);
       
     } catch (error) {
       console.error("Error starting avatar session:", error);
