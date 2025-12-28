@@ -55,6 +55,7 @@ function InteractiveAvatar() {
   const isProcessingRef = useRef(false);
   const hasGreetedRef = useRef(false);
   const hasStartedRef = useRef(false); // 중복 시작 방지
+  const userNameRef = useRef<string>('');
 
   async function fetchAccessToken() {
     try {
@@ -155,7 +156,9 @@ function InteractiveAvatar() {
             
             await new Promise(resolve => setTimeout(resolve, 1500));
             
-            const greeting = "안녕하세요? 저는 치매 예방 게임 도우미입니다. 도움이 필요하시다면 언제든지 말씀해주세요.";
+            const greeting = "const greeting = userNameRef.current 
+              ? `안녕하세요 ${userNameRef.current}님! 저는 치매 예방 게임 도우미입니다. 도움이 필요하시다면 언제든지 말씀해주세요.`
+              : "안녕하세요! 저는 치매 예방 게임 도우미입니다. 도움이 필요하시다면 언제든지 말씀해주세요.";";
             console.log("Sending greeting...");
             await speakWithAvatar(greeting);
             setChatHistory([{ role: "assistant", content: greeting }]);
@@ -237,6 +240,9 @@ function InteractiveAvatar() {
     const handleMessage = (event: MessageEvent) => {
       if (event.data && event.data.type === 'START_AVATAR') {
         console.log('📥 게임에서 시작 신호 받음!');
+      if (event.data.name) {
+        userNameRef.current = event.data.name;  // 🆕 이름 저장
+      }
         startSession();
       }
     };
