@@ -240,12 +240,18 @@ function InteractiveAvatar() {
     const handleMessage = (event: MessageEvent) => {
       if (event.data && event.data.type === 'START_AVATAR') {
         console.log('📥 게임에서 시작 신호 받음!');
-      if (event.data.name) {
-        userNameRef.current = event.data.name;  // 🆕 이름 저장
-      }
+        console.log('📥 받은 데이터:', event.data);  // 🆕 추가
+        console.log('📥 이름:', event.data.name);    // 🆕 추가
+        if (event.data.name) {
+          userNameRef.current = event.data.name;
+        }
         startSession();
       }
     };
+  
+  window.addEventListener('message', handleMessage);
+  return () => window.removeEventListener('message', handleMessage);
+}, []);
     
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
