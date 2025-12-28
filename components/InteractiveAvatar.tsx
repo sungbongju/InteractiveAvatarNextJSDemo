@@ -248,10 +248,6 @@ function InteractiveAvatar() {
         startSession();
       }
     };
-  
-  window.addEventListener('message', handleMessage);
-  return () => window.removeEventListener('message', handleMessage);
-}, []);
     
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
