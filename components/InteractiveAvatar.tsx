@@ -102,7 +102,7 @@ function InteractiveAvatar() {
       console.log("Calling avatar.speak()...");
       await avatarRef.current.speak({
         text: text,
-        taskType: TaskType.TALK,
+        taskType: TaskType.REPEAT,
       });
       console.log("Speak successful!");
     } catch (error) {
