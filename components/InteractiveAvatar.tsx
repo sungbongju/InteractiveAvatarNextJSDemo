@@ -292,20 +292,11 @@ function InteractiveAvatar() {
           </div>
         </div>
       ) : (
-        <div className="w-full h-full flex items-center justify-center">
-          {sessionState === StreamingAvatarSessionState.CONNECTING ? (
-            <div className="flex flex-col items-center gap-3 text-white">
-              <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-              <span className="text-sm">연결 중...</span>
-            </div>
-          ) : (
-            <button
-              className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-full text-base font-medium transition-all shadow-lg hover:shadow-xl"
-              onClick={startSession}
-            >
-              💬 상담 시작
-            </button>
-          )}
+        <div className="w-full h-full flex items-center justify-center bg-zinc-900">
+          <div className="flex flex-col items-center gap-3 text-white">
+            <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
+            <span className="text-lg">연결 중...</span>
+          </div>
         </div>
       )}
     </div>
