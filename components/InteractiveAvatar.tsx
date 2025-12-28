@@ -53,7 +53,8 @@ function InteractiveAvatar() {
   const [isListening, setIsListening] = useState(false);
   const mediaStream = useRef<HTMLVideoElement>(null);
   const isProcessingRef = useRef(false);
-  const hasGreetedRef = useRef(false); // 인사말 한 번만 실행하도록
+  const hasGreetedRef = useRef(false);
+  const hasStartedRef = useRef(false); // 중복 시작 방지
 
   async function fetchAccessToken() {
     try {
@@ -132,25 +133,28 @@ function InteractiveAvatar() {
   });
 
   const startSession = useMemoizedFn(async () => {
+    // 중복 시작 방지
+    if (hasStartedRef.current) {
+      console.log("Session already started, skipping...");
+      return;
+    }
+    hasStartedRef.current = true;
+    
     try {
       const newToken = await fetchAccessToken();
       const avatarInstance = initAvatar(newToken);
 
-      // STREAM_READY 이벤트에서 인사말 실행
       avatarInstance.on(StreamingEvents.STREAM_READY, async (event) => {
         console.log(">>>>> Stream ready:", event.detail);
         
-        // 인사말을 한 번만 실행하도록
         if (!hasGreetedRef.current) {
           try {
             console.log("Starting voice chat...");
             await avatarInstance.startVoiceChat();
             console.log("Voice chat started - using OpenAI for responses");
             
-            // Voice chat 완전 초기화 대기
             await new Promise(resolve => setTimeout(resolve, 1500));
             
-            // 인사말 실행
             const greeting = "안녕하세요? 저는 치매 예방 게임 도우미입니다. 도움이 필요하시다면 언제든지 말씀해주세요.";
             console.log("Sending greeting...");
             await speakWithAvatar(greeting);
@@ -166,7 +170,8 @@ function InteractiveAvatar() {
       
       avatarInstance.on(StreamingEvents.STREAM_DISCONNECTED, () => {
         console.log("Stream disconnected");
-        hasGreetedRef.current = false; // 재연결 시 다시 인사하도록
+        hasGreetedRef.current = false;
+        hasStartedRef.current = false; // 재연결 가능하도록
       });
 
       avatarInstance.on(StreamingEvents.USER_START, () => {
@@ -191,6 +196,7 @@ function InteractiveAvatar() {
       
     } catch (error) {
       console.error("Error starting avatar session:", error);
+      hasStartedRef.current = false; // 에러 시 재시도 가능하도록
     }
   });
 
@@ -223,11 +229,20 @@ function InteractiveAvatar() {
   useUnmount(() => {
     stopAvatar();
     hasGreetedRef.current = false;
+    hasStartedRef.current = false;
   });
 
-    // 🆕 자동 시작 추가
+  // 🆕 게임 시작 메시지 받으면 시작
   useEffect(() => {
-    startSession();
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'START_AVATAR') {
+        console.log('📥 게임에서 시작 신호 받음!');
+        startSession();
+      }
+    };
+    
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
   }, []);
 
   useEffect(() => {
@@ -251,7 +266,6 @@ function InteractiveAvatar() {
               style={{ display: "block", width: "100%", height: "auto" }}
             />
             
-            {/* 종료 버튼 (안쪽 X) */}
             <button
               className="absolute top-2 right-2 w-7 h-7 bg-black/50 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs transition-all"
               title="종료"
@@ -260,7 +274,6 @@ function InteractiveAvatar() {
               ✕
             </button>
 
-            {/* 음성 인식 상태 표시 */}
             <div className="absolute bottom-2 left-2 flex items-center gap-2">
               <div className={`w-3 h-3 rounded-full ${isListening ? 'bg-red-500 animate-pulse' : isLoading ? 'bg-yellow-500' : 'bg-green-500'}`} />
               <span className="text-white text-xs bg-black/50 px-2 py-1 rounded">
@@ -269,7 +282,6 @@ function InteractiveAvatar() {
             </div>
           </div>
 
-          {/* 텍스트 입력 */}
           <div className="p-2 bg-zinc-800 border-t border-zinc-700">
             <div className="flex gap-2">
               <input
@@ -293,10 +305,17 @@ function InteractiveAvatar() {
         </div>
       ) : (
         <div className="w-full h-full flex items-center justify-center bg-zinc-900">
-          <div className="flex flex-col items-center gap-3 text-white">
-            <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
-            <span className="text-lg">연결 중...</span>
-          </div>
+          {sessionState === StreamingAvatarSessionState.CONNECTING ? (
+            <div className="flex flex-col items-center gap-3 text-white">
+              <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
+              <span className="text-lg">연결 중...</span>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-3 text-white">
+              <span className="text-lg">🎮 게임을 시작하면</span>
+              <span className="text-lg">AI 도우미가 나타나요!</span>
+            </div>
+          )}
         </div>
       )}
     </div>
