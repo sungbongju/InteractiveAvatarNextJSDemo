@@ -33,7 +33,7 @@ import { WebSpeechRecognizer } from "@/app/lib/webSpeechAPI";
 // 아바타 설정 - Onyx 다국어 남성 음성 + Wayne 아바타 사용
 const AVATAR_CONFIG: StartAvatarRequest = {
   quality: AvatarQuality.Low,
-  avatarName: "Wayne_20240711",  // 한국인 남성 아바타
+  avatarName: "bd74ee1771d04a818d23806c3f09a43a",  // 한국인 남성 아바타
   voice: {
     voiceId: "26b2064088674c80b1e5fc5ab1a068ea",  // Onyx (Multilingual)
     rate: 1.0,
