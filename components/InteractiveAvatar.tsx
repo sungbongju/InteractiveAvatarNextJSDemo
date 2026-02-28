@@ -208,13 +208,19 @@ function InteractiveAvatar() {
           // 아바타 발화
           await speakWithAvatar(reply);
 
-          // 🎯 탭 이동 명령이 있으면 부모 페이지에 전달
+          // 🎯 탭 이동 명령이 있으면 부모 페이지에 전달 + 탭 설명 발화
           if (action === "navigate" && navigateTabId) {
             console.log("📑 Navigate to tab:", navigateTabId);
             window.parent.postMessage({
               type: "NAVIGATE_TAB",
               tabId: navigateTabId
             }, "*");
+
+            // 스크롤 후 해당 탭 설명 발화
+            const script = await fetchTabScript(navigateTabId);
+            if (script) {
+              await speakWithAvatar(script);
+            }
           }
 
           setIsLoading(false);
@@ -477,13 +483,18 @@ function InteractiveAvatar() {
 
     await speakWithAvatar(reply);
 
-    // 🎯 탭 이동 명령이 있으면 부모 페이지에 전달
+    // 🎯 탭 이동 명령이 있으면 부모 페이지에 전달 + 탭 설명 발화
     if (action === "navigate" && navigateTabId) {
       console.log("📑 Navigate to tab:", navigateTabId);
       window.parent.postMessage({
         type: "NAVIGATE_TAB",
         tabId: navigateTabId
       }, "*");
+
+      const script = await fetchTabScript(navigateTabId);
+      if (script) {
+        await speakWithAvatar(script);
+      }
     }
 
     setIsLoading(false);
@@ -570,6 +581,11 @@ function InteractiveAvatar() {
                 type: "NAVIGATE_TAB",
                 tabId: navigateTabId,
               }, "*");
+
+              const script = await fetchTabScript(navigateTabId);
+              if (script) {
+                await speakWithAvatar(script);
+              }
             }
 
             setIsLoading(false);
