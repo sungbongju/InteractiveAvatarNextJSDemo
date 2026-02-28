@@ -694,58 +694,30 @@ function InteractiveAvatar() {
           </div>
         </div>
       ) : (
-        <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden"
-          style={{
-            background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
-          }}
-        >
-          {/* 배경 장식 원 */}
-          <div className="absolute top-[-30px] right-[-30px] w-24 h-24 rounded-full opacity-10"
-            style={{ background: "radial-gradient(circle, #667eea, transparent)" }}
-          />
-          <div className="absolute bottom-[-20px] left-[-20px] w-20 h-20 rounded-full opacity-10"
-            style={{ background: "radial-gradient(circle, #764ba2, transparent)" }}
-          />
-
+        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900">
           {sessionState === StreamingAvatarSessionState.CONNECTING ? (
-            <div className="flex flex-col items-center gap-3 text-white">
-              <div className="w-10 h-10 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
-              <span className="text-sm text-purple-200">AI 가이드 연결 중...</span>
+            <div className="flex flex-col items-center gap-4">
+              <div className="relative w-16 h-16">
+                <div className="absolute inset-0 rounded-full border-2 border-purple-500/30 animate-ping" />
+                <div className="absolute inset-2 rounded-full border-2 border-purple-400 border-t-transparent animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center text-2xl">💬</div>
+              </div>
+              <span className="text-zinc-300 text-sm tracking-wide">AI 가이드 연결 중...</span>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-4 px-6 text-center z-10">
-              {/* 아이콘 */}
-              <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl"
-                style={{
-                  background: "linear-gradient(135deg, #667eea, #764ba2)",
-                  boxShadow: "0 4px 20px rgba(102, 126, 234, 0.4)",
-                }}
-              >
-                🎓
+            <div className="flex flex-col items-center gap-5">
+              <div className="relative group cursor-pointer" onClick={startSession}>
+                <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full blur opacity-60 group-hover:opacity-100 transition duration-500" />
+                <div className="relative w-20 h-20 bg-zinc-900 rounded-full flex items-center justify-center border border-zinc-700 group-hover:border-purple-500 transition-all duration-300">
+                  <svg className="w-8 h-8 text-purple-400 group-hover:text-white transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </div>
               </div>
-
-              {/* 타이틀 */}
-              <div>
-                <p className="text-white text-sm font-semibold">경영학전공 AI 가이드</p>
-                <p className="text-purple-300 text-xs mt-1">궁금한 점을 물어보세요</p>
+              <div className="text-center">
+                <p className="text-white text-sm font-medium">대화를 시작하려면 터치하세요</p>
+                <p className="text-zinc-500 text-xs mt-1">음성으로 질문할 수 있습니다</p>
               </div>
-
-              {/* 시작 버튼 */}
-              <button
-                className="px-8 py-3 text-white rounded-full text-sm font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95"
-                style={{
-                  background: "linear-gradient(135deg, #667eea, #764ba2)",
-                  boxShadow: "0 4px 16px rgba(102, 126, 234, 0.4)",
-                }}
-                onClick={startSession}
-              >
-                ▶ 대화 시작하기
-              </button>
-
-              {/* 하단 안내 */}
-              <p className="text-zinc-500 text-xs">
-                음성 · 텍스트 모두 가능
-              </p>
             </div>
           )}
         </div>
