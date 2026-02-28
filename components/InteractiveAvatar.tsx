@@ -15,6 +15,9 @@
  * 
  * 🔧 2026-01-27 수정:
  * - allowedOrigins에 sungbongju.github.io 추가
+ * 
+ * 🔧 2026-02-28 수정:
+ * - 교수님 Interactive Avatar로 변경
  * ================================================
  */
 
@@ -33,12 +36,12 @@ import { StreamingAvatarProvider, StreamingAvatarSessionState } from "./logic";
 import { AVATARS } from "@/app/lib/constants";
 import { WebSpeechRecognizer } from "@/app/lib/webSpeechAPI";
 
-// 아바타 설정 - Onyx 다국어 남성 음성 + Wayne 아바타 사용
+// 🔧 2026-02-28 수정: 교수님 Interactive Avatar로 변경
 const AVATAR_CONFIG: StartAvatarRequest = {
   quality: AvatarQuality.Low,
-  avatarName: "bd74ee1771d04a818d23806c3f09a43a",  // 봉주 아바타
+  avatarName: "e2eb35c947644f09820aa3a4f9c15488",  // 교수님 아바타
   voice: {
-    voiceId: "b0fb14ad9bf14d7aaefb4d45a89412d7",  // 봉주 아바타 목소리
+    voiceId: "",  // 빈 값 → 아바타에 내장된 교수님 음성 자동 사용
     rate: 1.0,
     emotion: VoiceEmotion.FRIENDLY,
   },
@@ -290,48 +293,26 @@ function InteractiveAvatar() {
       return;
     }
 
-    console.log("🎤 Web Speech API 초기화 중...");
-
     webSpeechRef.current = new WebSpeechRecognizer(
       {
         onResult: (transcript: string, isFinal: boolean) => {
-          if (isAvatarSpeakingRef.current) {
-            return;
-          }
+          if (isAvatarSpeakingRef.current) return;
 
           if (isFinal) {
-            console.log("🎤 최종 인식:", transcript);
-            setInterimTranscript("");
+            console.log("🎤 Final:", transcript);
             handleUserSpeech(transcript);
           } else {
             setInterimTranscript(transcript);
           }
         },
-
         onStart: () => {
-          if (!isAvatarSpeakingRef.current) {
-            setIsListening(true);
-          }
+          console.log("🎤 Web Speech 시작");
+          setIsListening(true);
         },
-
         onEnd: () => {
+          console.log("🎤 Web Speech 종료");
           setIsListening(false);
         },
-
-        onSpeechStart: () => {
-          if (!isAvatarSpeakingRef.current) {
-            setIsListening(true);
-          }
-        },
-
-        onSpeechEnd: () => {
-          setTimeout(() => {
-            if (!isAvatarSpeakingRef.current) {
-              setIsListening(false);
-            }
-          }, 500);
-        },
-
         onError: (error: string) => {
           console.error("🎤 Web Speech 에러:", error);
           if (error === "not-allowed") {
