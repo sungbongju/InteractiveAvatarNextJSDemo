@@ -530,11 +530,54 @@ function InteractiveAvatar() {
         return;
       }
 
-      const { type, tabId } = event.data || {};
-      console.log("📥 Received message:", { type, tabId, origin: event.origin });
+      const { type, tabId, question } = event.data || {};
+      console.log("📥 Received message:", { type, tabId, question, origin: event.origin });
 
       if (type === "TAB_CHANGED" && tabId) {
         handleTabChange(tabId);
+      }
+
+      // 🎯 외부에서 질문 보내기 (콘솔 또는 랜딩페이지 CTA 버튼)
+      if (type === "ASK_QUESTION" && question) {
+        console.log("💬 ASK_QUESTION:", question);
+        if (!avatarRef.current || isProcessingRef.current) {
+          console.log("⚠️ 아바타 미연결 또는 처리 중 - 무시");
+          return;
+        }
+        isProcessingRef.current = true;
+        setIsLoading(true);
+
+        setChatHistory((prev) => {
+          const newHistory = [
+            ...prev,
+            { role: "user" as const, content: question },
+          ];
+
+          callOpenAI(question, prev).then(async (response) => {
+            const reply = response.reply || response;
+            const action = response.action;
+            const navigateTabId = response.tabId;
+
+            setChatHistory((current) => [
+              ...current,
+              { role: "assistant" as const, content: reply },
+            ]);
+
+            await speakWithAvatar(reply);
+
+            if (action === "navigate" && navigateTabId) {
+              window.parent.postMessage({
+                type: "NAVIGATE_TAB",
+                tabId: navigateTabId,
+              }, "*");
+            }
+
+            setIsLoading(false);
+            isProcessingRef.current = false;
+          });
+
+          return newHistory;
+        });
       }
     };
 
