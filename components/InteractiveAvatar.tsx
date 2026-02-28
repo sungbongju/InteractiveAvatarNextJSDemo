@@ -694,19 +694,59 @@ function InteractiveAvatar() {
           </div>
         </div>
       ) : (
-        <div className="w-full h-full flex items-center justify-center">
+        <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden"
+          style={{
+            background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
+          }}
+        >
+          {/* 배경 장식 원 */}
+          <div className="absolute top-[-30px] right-[-30px] w-24 h-24 rounded-full opacity-10"
+            style={{ background: "radial-gradient(circle, #667eea, transparent)" }}
+          />
+          <div className="absolute bottom-[-20px] left-[-20px] w-20 h-20 rounded-full opacity-10"
+            style={{ background: "radial-gradient(circle, #764ba2, transparent)" }}
+          />
+
           {sessionState === StreamingAvatarSessionState.CONNECTING ? (
             <div className="flex flex-col items-center gap-3 text-white">
-              <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-              <span className="text-sm">연결 중...</span>
+              <div className="w-10 h-10 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+              <span className="text-sm text-purple-200">AI 가이드 연결 중...</span>
             </div>
           ) : (
-            <button
-              className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-full text-base font-medium shadow-lg"
-              onClick={startSession}
-            >
-              🎓 AI 가이드 시작
-            </button>
+            <div className="flex flex-col items-center gap-4 px-6 text-center z-10">
+              {/* 아이콘 */}
+              <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl"
+                style={{
+                  background: "linear-gradient(135deg, #667eea, #764ba2)",
+                  boxShadow: "0 4px 20px rgba(102, 126, 234, 0.4)",
+                }}
+              >
+                🎓
+              </div>
+
+              {/* 타이틀 */}
+              <div>
+                <p className="text-white text-sm font-semibold">경영학전공 AI 가이드</p>
+                <p className="text-purple-300 text-xs mt-1">궁금한 점을 물어보세요</p>
+              </div>
+
+              {/* 시작 버튼 */}
+              <button
+                className="px-8 py-3 text-white rounded-full text-sm font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95"
+                style={{
+                  background: "linear-gradient(135deg, #667eea, #764ba2)",
+                  boxShadow: "0 4px 16px rgba(102, 126, 234, 0.4)",
+                }}
+                onClick={startSession}
+              >
+                ▶ 대화 시작하기
+              </button>
+
+              {/* 하단 안내 */}
+              <p className="text-zinc-500 text-xs">
+                음성 · 텍스트 모두 가능
+              </p>
+            </div>
           )}
         </div>
       )}
