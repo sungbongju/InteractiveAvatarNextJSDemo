@@ -205,10 +205,7 @@ function InteractiveAvatar() {
             { role: "assistant" as const, content: reply },
           ]);
 
-          // 아바타 발화
-          await speakWithAvatar(reply);
-
-          // 🎯 탭 이동 명령이 있으면 부모 페이지에 전달 + 탭 설명 발화
+          // 🎯 navigate면 reply 대신 탭 스크립트만 발화
           if (action === "navigate" && navigateTabId) {
             console.log("📑 Navigate to tab:", navigateTabId);
             window.parent.postMessage({
@@ -216,11 +213,12 @@ function InteractiveAvatar() {
               tabId: navigateTabId
             }, "*");
 
-            // 스크롤 후 해당 탭 설명 발화
             const script = await fetchTabScript(navigateTabId);
             if (script) {
               await speakWithAvatar(script);
             }
+          } else {
+            await speakWithAvatar(reply);
           }
 
           setIsLoading(false);
@@ -481,9 +479,7 @@ function InteractiveAvatar() {
       { role: "assistant" as const, content: reply },
     ]);
 
-    await speakWithAvatar(reply);
-
-    // 🎯 탭 이동 명령이 있으면 부모 페이지에 전달 + 탭 설명 발화
+    // 🎯 navigate면 reply 대신 탭 스크립트만 발화
     if (action === "navigate" && navigateTabId) {
       console.log("📑 Navigate to tab:", navigateTabId);
       window.parent.postMessage({
@@ -495,6 +491,8 @@ function InteractiveAvatar() {
       if (script) {
         await speakWithAvatar(script);
       }
+    } else {
+      await speakWithAvatar(reply);
     }
 
     setIsLoading(false);
@@ -574,8 +572,7 @@ function InteractiveAvatar() {
               { role: "assistant" as const, content: reply },
             ]);
 
-            await speakWithAvatar(reply);
-
+            // 🎯 navigate면 reply 대신 탭 스크립트만 발화
             if (action === "navigate" && navigateTabId) {
               window.parent.postMessage({
                 type: "NAVIGATE_TAB",
@@ -586,6 +583,8 @@ function InteractiveAvatar() {
               if (script) {
                 await speakWithAvatar(script);
               }
+            } else {
+              await speakWithAvatar(reply);
             }
 
             setIsLoading(false);
