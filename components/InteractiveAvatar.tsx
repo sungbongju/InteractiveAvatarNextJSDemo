@@ -48,6 +48,91 @@ const AVATAR_CONFIG: StartAvatarRequest = {
   language: "ko",
 };
 
+// ============================================
+// DB 저장 API 설정
+// ============================================
+const API_BASE = "https://aiforalab.com/business-api/api.php";
+
+// DB에 대화 저장하는 함수
+async function saveChatToDB(
+  userMessage: string,
+  botResponse: string,
+  sessionId: string
+) {
+  const token = (window as any).__business_token;
+  if (!token) return;
+
+  try {
+    await fetch(`${API_BASE}?action=save_chat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        user_message: userMessage,
+        bot_response: botResponse,
+        session_id: sessionId,
+      }),
+    });
+  } catch (e) {
+    console.warn("⚠️ 대화 DB 저장 실패:", e);
+  }
+}
+
+// ============================================
+// 개인화 인사말 생성
+// ============================================
+function generateGreeting(userInfo: any): string {
+  const name = userInfo?.name || '';
+  const history = userInfo?.history;
+
+  // 이력 정보가 없거나 첫 방문인 경우
+  if (!history || history.visit_count <= 1) {
+    if (name) {
+      return `안녕하세요, ${name}님! 차 의과학 대학교 경영학전공 에이 아이 가이드입니다. ${name}님의 방문을 환영합니다! 전공에 대해 궁금한 게 있으면, 편하게 물어보세요!`;
+    }
+    return `안녕하세요! 차 의과학 대학교 경영학전공 에이 아이 가이드입니다. 전공에 대해 궁금한 게 있으면, 편하게 물어보세요!`;
+  }
+
+  // 재방문인 경우 — 개인화 인사말
+  const visitCount = history.visit_count;
+  const topics = history.recent_topics || [];
+
+  // 경영학용 토픽 한국어 매핑
+  const topicNames: Record<string, string> = {
+    '연구분야': '연구분야',
+    '커리큘럼': '커리큘럼',
+    '취업': '취업과 진로',
+    '세부전공': '세부 전공',
+    '미래가치': '미래가치와 비전',
+    '바이오': '바이오헬스케어',
+    '졸업생': '졸업생 진로',
+  };
+
+  // 토픽 문자열 생성
+  let topicStr = '';
+  if (topics.length === 1) {
+    topicStr = topicNames[topics[0]] || topics[0];
+  } else if (topics.length === 2) {
+    topicStr = `${topicNames[topics[0]] || topics[0]}과, ${topicNames[topics[1]] || topics[1]}`;
+  } else if (topics.length >= 3) {
+    topicStr = `${topicNames[topics[0]] || topics[0]}, ${topicNames[topics[1]] || topics[1]} 등`;
+  }
+
+  // 방문 횟수를 한글로
+  const visitKorean = ['', '', '두', '세', '네', '다섯', '여섯', '일곱', '여덟', '아홉', '열'];
+  const visitWord = visitCount <= 10
+    ? `${visitKorean[visitCount]}번째`
+    : `${visitCount}번째`;
+
+  if (topicStr) {
+    return `${name}님, ${visitWord} 방문을 환영합니다! 지난번에는, ${topicStr}에 대해 물어보셨는데, 오늘은 어떤 부분이 궁금하세요?`;
+  }
+
+  return `${name}님, ${visitWord} 방문을 환영합니다! 오늘은 어떤 것이 궁금하세요?`;
+}
+
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
@@ -81,6 +166,9 @@ function InteractiveAvatar() {
   // Web Speech API ref
   const webSpeechRef = useRef<WebSpeechRecognizer | null>(null);
   const isAvatarSpeakingRef = useRef(false);
+
+  // 사용자 정보 (로그인 후 postMessage로 수신)
+  const userInfoRef = useRef<any>(null);
 
   // ============================================
   // API 호출
@@ -220,6 +308,9 @@ function InteractiveAvatar() {
           } else {
             await speakWithAvatar(reply);
           }
+
+          // ★ 대화 DB 저장
+          saveChatToDB(transcript, reply, (window as any).__business_session || "default");
 
           setIsLoading(false);
           isProcessingRef.current = false;
@@ -400,13 +491,26 @@ function InteractiveAvatar() {
         if (!hasGreetedRef.current) {
           await new Promise((r) => setTimeout(r, 1500));
 
-          const greeting =
-            "안녕하세요! 차의과학대학교 경영학전공 AI 가이드입니다. 궁금한 탭을 클릭하거나, 질문을 말씀해주세요!";
-
-          console.log("👋 인사말:", greeting);
-          await speakWithAvatar(greeting);
-          setChatHistory([{ role: "assistant", content: greeting }]);
-          hasGreetedRef.current = true;
+          // ★ USER_INFO가 이미 있으면 즉시 개인화 인사
+          if (userInfoRef.current) {
+            const greeting = generateGreeting(userInfoRef.current);
+            console.log("👋 개인화 인사말:", greeting);
+            await speakWithAvatar(greeting);
+            setChatHistory([{ role: "assistant", content: greeting }]);
+            hasGreetedRef.current = true;
+          } else {
+            // USER_INFO 대기 (3초 후 기본 인사말)
+            console.log("⏳ USER_INFO 대기 중... (3초 타임아웃)");
+            await new Promise((r) => setTimeout(r, 3000));
+            if (!hasGreetedRef.current) {
+              const greeting =
+                "안녕하세요! 차의과학대학교 경영학전공 AI 가이드입니다. 궁금한 탭을 클릭하거나, 질문을 말씀해주세요!";
+              console.log("👋 기본 인사말:", greeting);
+              await speakWithAvatar(greeting);
+              setChatHistory([{ role: "assistant", content: greeting }]);
+              hasGreetedRef.current = true;
+            }
+          }
         }
       });
 
@@ -495,6 +599,9 @@ function InteractiveAvatar() {
       await speakWithAvatar(reply);
     }
 
+    // ★ 대화 DB 저장
+    saveChatToDB(text, reply, (window as any).__business_session || "default");
+
     setIsLoading(false);
   });
 
@@ -541,6 +648,39 @@ function InteractiveAvatar() {
 
       const { type, tabId, question } = event.data || {};
       console.log("📥 Received message:", { type, tabId, question, origin: event.origin });
+
+      // ★ 로그인된 사용자 정보 + 이력 수신
+      if (type === "USER_INFO" && event.data.user) {
+        userInfoRef.current = {
+          name: event.data.user.name,
+          student_id: event.data.user.student_id,
+          history: event.data.history || null,
+        };
+
+        // 토큰 저장 (대화 DB 저장에 사용)
+        if (event.data.token) {
+          (window as any).__business_token = event.data.token;
+        }
+        if (event.data.sessionId) {
+          (window as any).__business_session = event.data.sessionId;
+        }
+        console.log("👤 사용자 정보 수신:", event.data.user.name);
+
+        // ★ 아바타가 이미 준비됐지만 아직 인사 안 한 경우 → 즉시 개인화 인사
+        if (avatarRef.current && hasGreetedRef.current === false && hasStartedRef.current) {
+          const greeting = generateGreeting(userInfoRef.current);
+          console.log("👋 개인화 인사말 (USER_INFO 도착 후):", greeting);
+          await speakWithAvatar(greeting);
+          setChatHistory([{ role: "assistant", content: greeting }]);
+          hasGreetedRef.current = true;
+        }
+
+        // ★ 아바타가 아직 시작되지 않았으면 자동 시작
+        if (!hasStartedRef.current) {
+          console.log("🚀 USER_INFO 수신 → 아바타 자동 시작");
+          startSession();
+        }
+      }
 
       if (type === "TAB_CHANGED" && tabId) {
         handleTabChange(tabId);
@@ -594,11 +734,18 @@ function InteractiveAvatar() {
           return newHistory;
         });
       }
+
+      // 아바타 시작 신호
+      if (type === "START_AVATAR") {
+        if (!hasStartedRef.current) {
+          startSession();
+        }
+      }
     };
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [handleTabChange]);
+  }, [handleTabChange, startSession]);
 
   // 언마운트 시 정리
   useUnmount(() => {
