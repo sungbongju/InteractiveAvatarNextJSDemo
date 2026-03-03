@@ -488,6 +488,9 @@ function InteractiveAvatar() {
       avatar.on(StreamingEvents.STREAM_READY, async (event) => {
         console.log("Stream ready:", event.detail);
 
+        // ★ 부모 페이지에 아바타 준비 완료 알림
+        try { window.parent.postMessage({ type: 'AVATAR_READY' }, '*'); } catch(e) {}
+
         if (!hasGreetedRef.current) {
           await new Promise((r) => setTimeout(r, 1500));
 
@@ -649,8 +652,14 @@ function InteractiveAvatar() {
       const { type, tabId, question } = event.data || {};
       console.log("📥 Received message:", { type, tabId, question, origin: event.origin });
 
-      // ★ 로그인된 사용자 정보 + 이력 수신
+      // ★ 로그인된 사용자 정보 + 이력 수신 (최초 1회만 처리)
       if (type === "USER_INFO" && event.data.user) {
+        // 이미 유저 정보 있으면 무시 (중복 전송 방지)
+        if (userInfoRef.current) {
+          console.log("👤 USER_INFO 중복 수신 무시:", event.data.user.name);
+          return;
+        }
+
         userInfoRef.current = {
           name: event.data.user.name,
           student_id: event.data.user.student_id,
