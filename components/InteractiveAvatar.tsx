@@ -750,6 +750,21 @@ function InteractiveAvatar() {
           startSession();
         }
       }
+
+      // 아바타 세션 종료 (X 버튼)
+      if (type === "CLOSE_AVATAR") {
+        console.log("🛑 CLOSE_AVATAR 수신 → 세션 종료");
+        webSpeechRef.current?.destroy();
+        webSpeechRef.current = null;
+        try {
+          await stopAvatar();
+        } catch {
+          // ignore
+        }
+        hasStartedRef.current = false;
+        hasGreetedRef.current = false;
+        userInfoRef.current = null;
+      }
     };
 
     window.addEventListener("message", handleMessage);
