@@ -410,11 +410,7 @@ function InteractiveAvatar() {
         },
         onError: (error: string) => {
           console.error("🎤 Web Speech 에러:", error);
-          if (error === "not-allowed") {
-            alert(
-              "마이크 권한이 필요합니다. 브라우저 설정에서 마이크를 허용해주세요.",
-            );
-          }
+          // 마이크 권한 거부 시 alert 없이 조용히 처리 (마이크 없는 환경 대응)
         },
       },
       {
@@ -545,9 +541,14 @@ function InteractiveAvatar() {
 
       await startAvatar(AVATAR_CONFIG);
 
-      // 마이크 자동 시작하지 않음 (마이크 없는 환경 대응)
-      // 사용자가 마이크 버튼을 직접 클릭해야 음성인식 시작
-      console.log("🎤 마이크는 버튼 클릭 시 활성화됩니다");
+      // 마이크 자동 시작 (실패해도 조용히 처리)
+      console.log("🎤 Web Speech API 시작...");
+      initWebSpeech();
+
+      setTimeout(() => {
+        webSpeechRef.current?.start();
+        console.log("🎤 Web Speech 인식 시작");
+      }, 2000);
     } catch (error) {
       console.error("Session error:", error);
       hasStartedRef.current = false;
@@ -821,9 +822,9 @@ function InteractiveAvatar() {
   // ============================================
   const getStatusText = () => {
     if (isAvatarSpeaking) return "설명 중...";
-    if (isListening) return "듣는 중...";
+    if (isListening) return "듣는 중... 말씀하세요";
     if (isLoading) return "생각 중...";
-    return "말씀하세요";
+    return "텍스트로 질문하세요";
   };
 
   const getStatusColor = () => {
