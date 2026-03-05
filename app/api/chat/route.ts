@@ -351,6 +351,19 @@ export async function POST(request: NextRequest) {
         .replace(/\bRISE\b/g, '라이즈')
         .replace(/\bNGO\b/g, '엔지오')
         .replace(/(\d+)%/g, '$1 퍼센트');
+
+      // 합성어 + 조사 분리 (TTS가 합성어 끝 글자를 조사와 합쳐 오독하는 문제 방지)
+      const compoundWords = [
+        '경영학', '헬스케어', '캡스톤', '마케팅', '경영기획', '회계재무',
+        '액션러닝', '복수전공', '경영전략', '조직행동', '금융시장',
+        '투자자산', '비즈니스', '애널리틱스', '빅데이터', '스타트업',
+        '벤처캐피탈', '인큐베이팅', '부트캠프', '경진대회', '팀프로젝트',
+        '차의과학대', '스포츠의학', '데이터학', '커뮤니케이션',
+        '해커톤', '세미나', '데모데이', '리더십', '인사조직',
+      ];
+      const particles = '은|는|이|가|을|를|의|에|에서|으로|로|만|만의|과|와|도|까지|부터|에게|한테|처럼|보다|라는|이라는|에는|으로는|만으로|에서는';
+      const compoundRegex = new RegExp(`(${compoundWords.join('|')})(${particles})`, 'g');
+      parsedReply.reply = parsedReply.reply.replace(compoundRegex, '$1 $2');
     }
 
     console.log("🤖 OpenAI response:", parsedReply);
