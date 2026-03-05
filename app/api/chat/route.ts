@@ -68,9 +68,10 @@ const SECTION_SCRIPTS: Record<string, string> = {
 const SYSTEM_PROMPT = `당신은 차의과학대학교, 미래융합대학, 헬스케어융합학부, 경영학 전공의 AI 상담사입니다.
 학생들의 전공 관련 질문에 친절하고 정확하게 답변해주세요.
 
-## 🔊 발음 규칙 (TTS용 - 매우 중요!)
-- "경영학전공"은 항상 "경영학 전공"으로 띄어서 작성
-- "차의과학대학교"는 "차 의과학대학교,"로 작성 (띄어쓰기 + 쉼표)
+## 🔊 발음 규칙 (TTS용 - 절대 규칙, 무조건 따를 것!)
+아래 규칙을 어기면 TTS가 이상하게 읽습니다. 예외 없이 무조건 지키세요.
+- "경영학전공"은 무조건 "경영학 전공"으로 띄어서 작성
+- "차의과학대학교"는 무조건 "차 의과학대학교,"로 작성 (띄어쓰기 + 쉼표)
 - "차병원" → "차 병원", "차병원그룹" → "차 병원 그룹"
 - 영어 약어는 반드시 한글 발음으로: ESG → "이에스지", AI → "에이아이", R&D → "알앤디", IT → "아이티", IR → "아이알", PR → "피알", CHA → "씨에이치에이", ADsP → "에이디에스피", SQLD → "에스큐엘디", RISE → "라이즈"
 - % 기호 → "퍼센트"로 작성 (예: 88% → "88 퍼센트")
@@ -279,6 +280,27 @@ export async function POST(request: NextRequest) {
     } catch {
       console.error("JSON parse error, raw:", rawReply);
       parsedReply = { reply: rawReply, action: "none", tabId: null };
+    }
+
+    // TTS 발음 후처리 (GPT가 규칙을 안 따를 경우 강제 치환)
+    if (parsedReply.reply) {
+      parsedReply.reply = parsedReply.reply
+        .replace(/차의과학대학교/g, '차 의과학대학교,')
+        .replace(/차의과학대/g, '차 의과학대')
+        .replace(/경영학전공/g, '경영학 전공')
+        .replace(/차병원그룹/g, '차 병원 그룹')
+        .replace(/차병원/g, '차 병원')
+        .replace(/\bESG\b/g, '이에스지')
+        .replace(/\bAI\b/g, '에이아이')
+        .replace(/\bR&D\b/g, '알앤디')
+        .replace(/\bIT\b/g, '아이티')
+        .replace(/\bIR\b/g, '아이알')
+        .replace(/\bPR\b/g, '피알')
+        .replace(/\bCRM\b/g, '씨알엠')
+        .replace(/\bADsP\b/g, '에이디에스피')
+        .replace(/\bSQLD\b/g, '에스큐엘디')
+        .replace(/\bRISE\b/g, '라이즈')
+        .replace(/(\d+)%/g, '$1 퍼센트');
     }
 
     console.log("🤖 OpenAI response:", parsedReply);
