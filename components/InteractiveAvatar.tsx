@@ -90,9 +90,9 @@ function generateGreeting(userInfo: any): string {
   // 이력 정보가 없거나 첫 방문인 경우
   if (!history || history.visit_count <= 1) {
     if (name) {
-      return `안녕하세요, ${name}님! 차의과학 대학,교 경영학 전공, 에이아이 가이드입니다. ${name}님의 방문을 환영합니다! 전공에 대해 궁금한 게 있으시면, 편하게 물어보세요!`;
+      return `안녕하세요, ${name}님! 차 의과학 대학교 경영학 전공, 에이아이 가이드입니다. ${name}님의 방문을 환영합니다! 전공에 대해 궁금한 게 있으시면, 편하게 물어보세요!`;
     }
-    return `안녕하세요! 차의과학 대학,교 경영학 전공, 에이아이 가이드입니다. 전공에 대해 궁금한 게 있으시면, 편하게 물어보세요!`;
+    return `안녕하세요! 차 의과학 대학교 경영학 전공, 에이아이 가이드입니다. 전공에 대해 궁금한 게 있으시면, 편하게 물어보세요!`;
   }
 
   // 재방문인 경우 — 개인화 인사말
@@ -507,7 +507,7 @@ function InteractiveAvatar() {
             await new Promise((r) => setTimeout(r, 3000));
             if (!hasGreetedRef.current) {
               const greeting =
-                "안녕하세요! 차의과학 대학,교 경영학 전공, 에이아이 가이드입니다. 궁금한 부분을 클릭하거나, 질문을 말씀해주세요!";
+                "안녕하세요! 차 의과학 대학교 경영학 전공, 에이아이 가이드입니다. 궁금한 부분을 클릭하거나, 질문을 말씀해주세요!";
               console.log("👋 기본 인사말:", greeting);
               await speakWithAvatar(greeting);
               setChatHistory([{ role: "assistant", content: greeting }]);
