@@ -507,7 +507,7 @@ function InteractiveAvatar() {
             await new Promise((r) => setTimeout(r, 3000));
             if (!hasGreetedRef.current) {
               const greeting =
-                "안녕하세요! 차의과학대학교 경영학전공 AI 가이드입니다. 궁금한 탭을 클릭하거나, 질문을 말씀해주세요!";
+                "안녕하세요! 차의과학 대학,교 경영학 전공, 에이아이 가이드입니다. 궁금한 부분을 클릭하거나, 질문을 말씀해주세요!";
               console.log("👋 기본 인사말:", greeting);
               await speakWithAvatar(greeting);
               setChatHistory([{ role: "assistant", content: greeting }]);
