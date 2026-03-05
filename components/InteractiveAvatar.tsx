@@ -90,9 +90,9 @@ function generateGreeting(userInfo: any): string {
   // 이력 정보가 없거나 첫 방문인 경우
   if (!history || history.visit_count <= 1) {
     if (name) {
-      return `안녕하세요, ${name}님! 차 의과학 대학교 경영학전공 에이 아이 가이드입니다. ${name}님의 방문을 환영합니다! 전공에 대해 궁금한 게 있으면, 편하게 물어보세요!`;
+      return `안녕하세요, ${name}님! 차 의과학대학교, 경영학 전공, 에이아이 가이드입니다. ${name}님의 방문을 환영합니다! 전공에 대해 궁금한 게 있으시면, 편하게 물어보세요!`;
     }
-    return `안녕하세요! 차 의과학 대학교 경영학전공 에이 아이 가이드입니다. 전공에 대해 궁금한 게 있으면, 편하게 물어보세요!`;
+    return `안녕하세요! 차 의과학대학교, 경영학 전공, 에이아이 가이드입니다. 전공에 대해 궁금한 게 있으시면, 편하게 물어보세요!`;
   }
 
   // 재방문인 경우 — 개인화 인사말
@@ -127,7 +127,7 @@ function generateGreeting(userInfo: any): string {
     : `${visitCount}번째`;
 
   if (topicStr) {
-    return `${name}님, ${visitWord} 방문을 환영합니다! 지난번에는, ${topicStr}에 대해 물어보셨는데, 오늘은 어떤 부분이 궁금하세요?`;
+    return `${name}님, ${visitWord} 방문을 환영합니다! 지난번에는, ${topicStr}에 대해 물어보셨죠. 오늘은 어떤 부분이 궁금하세요?`;
   }
 
   return `${name}님, ${visitWord} 방문을 환영합니다! 오늘은 어떤 것이 궁금하세요?`;
@@ -545,13 +545,9 @@ function InteractiveAvatar() {
 
       await startAvatar(AVATAR_CONFIG);
 
-      console.log("🎤 Web Speech API 시작...");
-      initWebSpeech();
-
-      setTimeout(() => {
-        webSpeechRef.current?.start();
-        console.log("🎤 Web Speech 인식 시작");
-      }, 2000);
+      // 마이크 자동 시작하지 않음 (마이크 없는 환경 대응)
+      // 사용자가 마이크 버튼을 직접 클릭해야 음성인식 시작
+      console.log("🎤 마이크는 버튼 클릭 시 활성화됩니다");
     } catch (error) {
       console.error("Session error:", error);
       hasStartedRef.current = false;
