@@ -307,10 +307,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // TTS 발음 후처리: 원본(채팅용)과 발음용(TTS)을 분리
-    let ttsReply = parsedReply.reply || "";
-    if (ttsReply) {
-      ttsReply = ttsReply
+    // TTS 발음 후처리 (GPT가 규칙을 안 따를 경우 강제 치환)
+    if (parsedReply.reply) {
+      parsedReply.reply = parsedReply.reply
         // 학교/학부/학과명
         .replace(/차의과학대학교/g, '차 의과학 대학교')
         .replace(/차의과학대/g, '차의과학대')
@@ -364,12 +363,12 @@ export async function POST(request: NextRequest) {
       ];
       const particles = '은|는|이|가|을|를|의|에|에서|으로|로|만|만의|과|와|도|까지|부터|에게|한테|처럼|보다|라는|이라는|에는|으로는|만으로|에서는';
       const compoundRegex = new RegExp(`(${compoundWords.join('|')})(${particles})`, 'g');
-      ttsReply = ttsReply.replace(compoundRegex, '$1 $2');
+      parsedReply.reply = parsedReply.reply.replace(compoundRegex, '$1 $2');
     }
 
     console.log("🤖 OpenAI response:", parsedReply);
 
-    return new Response(JSON.stringify({ ...parsedReply, ttsReply }), {
+    return new Response(JSON.stringify(parsedReply), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });

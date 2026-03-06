@@ -285,7 +285,6 @@ function InteractiveAvatar() {
           console.log("🎯 OpenAI response:", response);
 
           const reply = response.reply || response;
-          const ttsReply = response.ttsReply || reply;
           const action = response.action;
           const navigateTabId = response.tabId;
 
@@ -307,7 +306,7 @@ function InteractiveAvatar() {
               await speakWithAvatar(script);
             }
           } else {
-            await speakWithAvatar(ttsReply);
+            await speakWithAvatar(reply);
           }
 
           // ★ 대화 DB 저장
@@ -576,7 +575,6 @@ function InteractiveAvatar() {
     const response = await callOpenAI(text, chatHistory);
 
     const reply = response.reply || response;
-    const ttsReply = response.ttsReply || reply; // TTS용 발음 최적화 텍스트
     const action = response.action;
     const navigateTabId = response.tabId;
 
@@ -598,7 +596,7 @@ function InteractiveAvatar() {
         await speakWithAvatar(script);
       }
     } else {
-      await speakWithAvatar(ttsReply);
+      await speakWithAvatar(reply);
     }
 
     // ★ 대화 DB 저장
@@ -712,7 +710,6 @@ function InteractiveAvatar() {
 
           callOpenAI(question, prev).then(async (response) => {
             const reply = response.reply || response;
-            const ttsReply = response.ttsReply || reply;
             const action = response.action;
             const navigateTabId = response.tabId;
 
@@ -733,7 +730,7 @@ function InteractiveAvatar() {
                 await speakWithAvatar(script);
               }
             } else {
-              await speakWithAvatar(ttsReply);
+              await speakWithAvatar(reply);
             }
 
             setIsLoading(false);
